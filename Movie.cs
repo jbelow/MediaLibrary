@@ -42,6 +42,8 @@ namespace MovieLibrary
                         movie.movieId = UInt64.Parse(movieDetails[0]);
                         movie.title = movieDetails[1];
                         movie.genres = movieDetails[2].Split('|').ToList();
+                        movie.director = movieDetails[3];
+                        movie.runtime = movieDetails[4];
                     }
                     else
                     {
@@ -56,8 +58,13 @@ namespace MovieLibrary
                         movie.title = line.Substring(0, idx);
                         // remove title and last comma from the string
                         line = line.Substring(idx + 2);
+
                         // replace the "|" with ", "
-                        movie.genres = line.Split('|').ToList();
+                        string[] lastThreeDetails = line.Split(',');
+                        movie.genres = lastThreeDetails[0].Split('|').ToList();
+                        movie.director = lastThreeDetails[1];
+                        movie.runtime = lastThreeDetails[2];
+
                     }
                     Movies.Add(movie);
                 }
@@ -89,7 +96,7 @@ namespace MovieLibrary
                 // first generate movie id
                 movie.movieId = Movies.Max(m => m.movieId) + 1;
                 StreamWriter sw = new StreamWriter(filePath, true);
-                sw.WriteLine($"{movie.movieId},{movie.title},{string.Join("|", movie.genres)}");
+                sw.WriteLine($"{movie.movieId},{movie.title},{string.Join("|", movie.genres)},{movie.director},{movie.runtime}");
                 sw.Close();
                 // add movie details to Lists
                 Movies.Add(movie);
