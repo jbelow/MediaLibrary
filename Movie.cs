@@ -1,112 +1,44 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using NLog.Web;
 
 namespace MovieLibrary
 {
-    public class MovieFile
+    public class Movie
     {
-        // public property
-        public string filePath { get; set; }
-        public List<Movie> Movies { get; set; }
-        private static NLog.Logger logger = NLogBuilder.ConfigureNLog(Directory.GetCurrentDirectory() + "\\nlog.config").GetCurrentClassLogger();
+        public UInt64 movieId { get; set; }
+        // private field
 
-        // constructor is a special method that is invoked
-        // when an instance of a class is created
-        public MovieFile(string movieFilePath)
+
+
+        string _title;
+        public string title
         {
-            filePath = movieFilePath;
-            Movies = new List<Movie>();
-
-            // to populate the list with data, read from the data file
-            try
+            get
             {
-                StreamReader sr = new StreamReader(filePath);
-                // first line contains column headers
-                sr.ReadLine();
-                while (!sr.EndOfStream)
-                {
-                    // create instance of Movie class
-                    Movie movie = new Movie();
-                    string line = sr.ReadLine();
-                    // first look for quote(") in string
-                    // this indicates a comma(,) in movie title
-                    int idx = line.IndexOf('"');
-                    if (idx == -1)
-                    {
-                        // no quote = no comma in movie title
-                        // movie details are separated with comma(,)
-                        string[] movieDetails = line.Split(',');
-                        movie.movieId = UInt64.Parse(movieDetails[0]);
-                        movie.title = movieDetails[1];
-                        movie.genres = movieDetails[2].Split('|').ToList();
-                        movie.director = movieDetails[3];
-                        movie.runtime = movieDetails[4];
-                    }
-                    else
-                    {
-                        // quote = comma in movie title
-                        // extract the movieId
-                        movie.movieId = UInt64.Parse(line.Substring(0, idx - 1));
-                        // remove movieId and first quote from string
-                        line = line.Substring(idx + 1);
-                        // find the next quote
-                        idx = line.IndexOf('"');
-                        // extract the movieTitle
-                        movie.title = line.Substring(0, idx);
-                        // remove title and last comma from the string
-                        line = line.Substring(idx + 2);
-
-                        // replace the "|" with ", "
-                        string[] lastThreeDetails = line.Split(',');
-                        movie.genres = lastThreeDetails[0].Split('|').ToList();
-                        movie.director = lastThreeDetails[1];
-                        movie.runtime = lastThreeDetails[2];
-
-                    }
-                    Movies.Add(movie);
-                }
-                // close file when done
-                sr.Close();
-                logger.Info("Movies in file {Count}", Movies.Count);
+                return this._title;
             }
-            catch (Exception ex)
+            set
             {
-                logger.Error(ex.Message);
+                // if there is a comma(,) in the title, wrap it in quotes
+                this._title = value.IndexOf(',') != -1 ? $"\"{value}\"" : value;
             }
         }
 
-        // public method
-        public bool isUniqueTitle(string title)
+        public string director {get; set; }
+
+        public string runtime {get; set; }
+
+        public List<string> genres { get; set; }
+
+        // constructor
+        public Movie()
         {
-            if (Movies.ConvertAll(m => m.title.ToLower()).Contains(title.ToLower()))
-            {
-                logger.Info("Duplicate movie title {Title}", title);
-                return false;
-            }
-            return true;
+            genres = new List<string>();
         }
 
-        public void AddMovie(Movie movie)
+        public string Display()
         {
-            try
-            {
-                // first generate movie id
-                movie.movieId = Movies.Max(m => m.movieId) + 1;
-                StreamWriter sw = new StreamWriter(filePath, true);
-                sw.WriteLine($"{movie.movieId},{movie.title},{string.Join("|", movie.genres)},{movie.director},{movie.runtime}");
-                sw.Close();
-                // add movie details to Lists
-                Movies.Add(movie);
-                // log transaction
-                logger.Info("Movie id {Id} added", movie.movieId);
-            } 
-            catch(Exception ex)
-            {
-                logger.Error(ex.Message);
-            }
+            return $"Id: {movieId}\nTitle: {title}\nDifector: {director}\nRun Time: {runtime}\nGenres: {string.Join(", ", genres)}\n";
         }
     }
 }

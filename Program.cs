@@ -2,7 +2,6 @@
 using NLog.Web;
 using System.IO;
 
-
 namespace MediaLibrary
 {
     class Program
