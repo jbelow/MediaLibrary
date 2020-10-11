@@ -12,8 +12,14 @@ namespace MediaLibrary
         {
             logger.Info("Program started");
 
-            string movieFilePath = "moives.scrubbed.csv";
+
+
+            string movieFilePath = "movies.scrubbed.csv";
+            
+            // When trying to get the MoiveFile it comes up with "Program.cs(16,13): error CS0246: The type or namespace name 'MovieFile' could not be found (are you missing a using directive or an assembly reference?)"
+            // but if I want to try and call moive it works just fine (besides for the part of how the program doesn't work because of the MoiveFile not working)
             MovieFile movieFile = new MovieFile(movieFilePath);
+            Movie moive = new Movie();
 
             string choice = "";
             do
@@ -57,12 +63,20 @@ namespace MediaLibrary
                         {
                             movie.genres.Add("(no genres listed)");
                         }
+
+                        Console.WriteLine("Enter movie director");
+                        movie.director = Console.ReadLine();
+
+                        Console.WriteLine("Enter running time (h:m:s)");
+                        movie.runningTime = TimeSpan.Parse(Console.ReadLine());
+
                         // add movie
                         movieFile.AddMovie(movie);
                     }
                 }
                 else if (choice == "2")
                 {
+
                     // Display All Movies
                     foreach (Movie m in movieFile.Movies)
                     {

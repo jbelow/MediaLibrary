@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using NLog.Web;
 
-namespace MovieLibrary
+namespace MediaLibrary
 {
     public class MovieFile
     {
@@ -39,17 +39,17 @@ namespace MovieLibrary
                         // no quote = no comma in movie title
                         // movie details are separated with comma(,)
                         string[] movieDetails = line.Split(',');
-                        movie.movieId = UInt64.Parse(movieDetails[0]);
+                        movie.mediaId = UInt64.Parse(movieDetails[0]);
                         movie.title = movieDetails[1];
                         movie.genres = movieDetails[2].Split('|').ToList();
                         movie.director = movieDetails[3];
-                        movie.runtime = movieDetails[4];
+                        movie.runningTime = TimeSpan.Parse(movieDetails[4]);
                     }
                     else
                     {
                         // quote = comma in movie title
                         // extract the movieId
-                        movie.movieId = UInt64.Parse(line.Substring(0, idx - 1));
+                        movie.mediaId = UInt64.Parse(line.Substring(0, idx - 1));
                         // remove movieId and first quote from string
                         line = line.Substring(idx + 1);
                         // find the next quote
@@ -63,7 +63,7 @@ namespace MovieLibrary
                         string[] lastThreeDetails = line.Split(',');
                         movie.genres = lastThreeDetails[0].Split('|').ToList();
                         movie.director = lastThreeDetails[1];
-                        movie.runtime = lastThreeDetails[2];
+                        movie.runningTime = TimeSpan.Parse(lastThreeDetails[2]);
 
                     }
                     Movies.Add(movie);
@@ -94,14 +94,14 @@ namespace MovieLibrary
             try
             {
                 // first generate movie id
-                movie.movieId = Movies.Max(m => m.movieId) + 1;
+                movie.mediaId = Movies.Max(m => m.mediaId) + 1;
                 StreamWriter sw = new StreamWriter(filePath, true);
-                sw.WriteLine($"{movie.movieId},{movie.title},{string.Join("|", movie.genres)},{movie.director},{movie.runtime}");
+                sw.WriteLine($"{movie.mediaId},{movie.title},{string.Join("|", movie.genres)},{movie.director},{movie.runningTime}");
                 sw.Close();
                 // add movie details to Lists
                 Movies.Add(movie);
                 // log transaction
-                logger.Info("Movie id {Id} added", movie.movieId);
+                logger.Info("Movie id {Id} added", movie.mediaId);
             } 
             catch(Exception ex)
             {
